@@ -51,9 +51,10 @@ If you get stuck, try typing '''make help''' or looking at the Examples director
 
 === Making a TAP parser run (test harness) in C ===
 * In '''./picotap''', type:
-** '''make tap'''
+ make tap
 * Execute the test via the tap parser
-** '''./tap /PATH/TO/test.exe'''
+ ./tap /PATH/TO/test.exe
+* '''tap''' will open a pipe to '''test.exe''', reading its stdout and parser it
 * For output to stdout not part of the test plan results
 ** Prefix with a '''space''', '''tab''', or '''#'''
 
