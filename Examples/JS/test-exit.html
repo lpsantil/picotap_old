@@ -1,0 +1,14 @@
+<script src="../../libtap.js"></script>
+<script src="../../tap.js"></script>
+<script>
+
+tap.plan( 3 );
+tap.ok( 5 == 5, "5 equals 5" );
+tap.ok( 5 == 5, "5 equals 5" );
+throw( "Barf!" );
+tap.ok( true, "Fail here because of missing test" );
+tap.done();
+
+main( [ "tap.js", tap.doc ] );
+
+</script>
