@@ -38,12 +38,12 @@ If you get stuck, try typing '''make help''' or looking at the Examples director
 * Include '''libtap.js''' in your in HTML file
 ** '''<script src="libtap.js"></script>'''
 * Create test plan
-** <script>
-**: tap.plan( 2 );
-**: tap.ok( true, "True is always true" );
-**: tap.ok( !false, "Not False is true too" );
-**: tap.done();
-**: </script>
+** `<script>`
+**:`tap.plan( 2 );`
+**:`tap.ok( true, "True is always true" );`
+**:`tap.ok( !false, "Not False is true too" );`
+**:`tap.done();`
+**:`</script>`
 * For output to console.log not part of the test plan results
 ** Prefix with a '''space''', '''tab''', or '''#'''
 * Load the HTML file into your browser
@@ -63,16 +63,16 @@ If you get stuck, try typing '''make help''' or looking at the Examples director
 ** '''<script src="libtap.js"></script>'''
 ** '''<script src="tap.js"></script>'''
 * Create test plan
-** <script>
-**: tap.plan( 2 );
-**: tap.ok( true, "True is always true" );
-**: tap.ok( !false, "Not False is true too" );
-**: tap.done();
-**: </script>
+** `<script>`
+**:`tap.plan( 2 );`
+**:`tap.ok( true, "True is always true" );`
+**:`tap.ok( !false, "Not False is true too" );`
+**:`tap.done();`
+**:`</script>`
 * Execute the TAP parser
-** <script>
-**: main( [ "tap.js", tap.doc ] );
-**: </script>
+** `<script>`
+**:`main( [ "tap.js", tap.doc ] );`
+**:`</script>	
 * For output to console.log not part of the test plan results
 ** Prefix with a '''space''', '''tab''', or '''#'''
 * Load the HTML file into your browser
