@@ -26,112 +26,55 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
 #include <assert.h>
-#include <gc.h>
+#include "taptime.h"
 
-struct timeval tap_t0, tap_t1, tap_t;
+#ifdef __WATCOMC__
+extern FILE* popen( char* f, char* m );
+extern int pclose( FILE* f );
+#endif
 
-int timeval_subtract( struct timeval *result,
-                      struct timeval *x,
-                      struct timeval *y );
+TAP_time tap_t0, tap_t1, tap_t;
 
-int timeval_subtract( struct timeval *result,
-                      struct timeval *x,
-                      struct timeval *y )
-{
-   /* Perform the carry for the later subtraction by updating y. */
-   if( x->tv_usec < y->tv_usec )
-   {
-      int nsec = ( y->tv_usec - x->tv_usec ) / 1000000 + 1;
-      y->tv_usec -= 1000000 * nsec;
-      y->tv_sec += nsec;
-   }
-   if( x->tv_usec - y->tv_usec > 1000000 )
-   {
-      int nsec = ( x->tv_usec - y->tv_usec ) / 1000000;
-      y->tv_usec += 1000000 * nsec;
-      y->tv_sec -= nsec;
-   }
-
-   /* Compute the time remaining to wait.
-      tv_usec is certainly positive. */
-   result->tv_sec = x->tv_sec - y->tv_sec;
-   result->tv_usec = x->tv_usec - y->tv_usec;
-
-   /* Return 1 if result is negative. */
-   return x->tv_sec < y->tv_sec;
-}
-
-int tap_f, tap_length;
+FILE* tap_f = NULL;
+int tap_length;
 
 void tap_popen( char* f )
 {
-   tap_f = fileno( popen( f, "r" ) );
+   tap_f = popen( f, "r" );
 
-   assert( tap_f > 0 );
+   assert( tap_f != NULL );
 
    tap_length = 0;
-
-   gettimeofday( &tap_t0, NULL );
 };
 
-char* tap_buf;
-char* tap_buf_arr[ 1024 ];
-int tap_buf_length = 0,
-    lines = 0;
 char* tap_fn;
-
-void tap_pslurp( void )
-{
-   char* line;
-
-   tap_buf = GC_MALLOC( 64 * 1024 );
-
-   assert( tap_buf != NULL );
-
-   tap_buf_length = read( tap_f, tap_buf, 64 * 1024 );
-
-   assert( tap_buf_length > 0 );
-
-   gettimeofday( &tap_t1, NULL );
-   //tap_buf = tap_buf.split( "\n" );
-   line = strsep( &tap_buf, "\n" );
-   while( line != NULL )
-   {
-      if( strlen( line ) > 0 )
-      {
-         tap_buf_arr[ lines++ ] = line;
-      }
-      line = strsep( &tap_buf, "\n" );
-   }
-};
 
 void tap_pclose( void )
 {
-   pclose( fdopen( tap_f, "r" ) );
+   getTAPtime( &tap_t1 );
+   pclose( tap_f );
 };
 
-char* tap_badList;
+char tap_badList[ 512 ];
 int tap_testsRead, tap_bad, tap_good, tap_tests;
 
 void tap_parse( void )
 {
-   int i = 0;
    char ch;
-   char ibuf[ 64 ];
+   char* rt;
+   char ibuf[ 256 ];
+
    tap_testsRead = 0;
    tap_bad = 0;
-   tap_badList = GC_MALLOC( 4 * 1024 );
-   assert( tap_badList != NULL );
    tap_badList[ 0 ] = ibuf[ 0 ] = '\0';
    tap_good = 0;
    tap_tests = -1;
-   //tap_tests = parseInt( tap_buf[ 0 ].slice( 3 ), 10 );
-   sscanf( tap_buf_arr[ 0 ], "1..%i", &tap_tests );
+
+   getTAPtime( &tap_t0 );
+   rt = fgets( ibuf, 256, tap_f );
+   assert( rt != NULL );
+   sscanf( ibuf, "1..%i", &tap_tests );
 
    if( tap_tests < 1 )
    {
@@ -140,9 +83,9 @@ void tap_parse( void )
       exit( -1 );
    }
 
-   for( i = 1; i < lines; i++ )
+   while( fgets( ibuf, 256, tap_f ) != NULL )
    {
-      ch = tap_buf_arr[ i ][ 0 ];
+      ch = ibuf[ 0 ];
 
       switch( ch )
       {
@@ -158,13 +101,13 @@ void tap_parse( void )
          {
             tap_testsRead++;
 
-            if( strstr( tap_buf_arr[ i ], "not ok" ) == tap_buf_arr[ i ] )
+            if( strstr( ibuf, "not ok" ) == ibuf )
             {
                sprintf( ibuf, "%i,", tap_testsRead );
                strcat( tap_badList, ibuf );
                tap_bad++;
             }
-            else if( strstr( tap_buf_arr[ i ], "ok" ) != tap_buf_arr[ i ] )
+            else if( strstr( ibuf, "ok" ) != ibuf )
             {
                sprintf( ibuf, "%i,", tap_testsRead );
                strcat( tap_badList, ibuf );
@@ -183,9 +126,15 @@ void tap_parse( void )
 
 void tap_output( void )
 {
-   int t;
-   timeval_subtract( &tap_t, &tap_t1, &tap_t0 );
+   unsigned long t;
+
+   time_sub( &tap_t, &tap_t1, &tap_t0 );
+
+#ifdef __WATCOMC__
+   t = tap_t.time * 1000 + tap_t.millitm;
+#else
    t = ( tap_t.tv_sec * 1000000 + tap_t.tv_usec ) / 1000;
+#endif
 
    if( ( tap_tests == tap_testsRead ) &&
        ( tap_tests == tap_good ) )
@@ -218,27 +167,21 @@ void tap_output( void )
    }
 };
 
-char* tap_fn;
-
 void tap_run( char* f )
 {
    tap_fn = f;
 
    tap_popen( tap_fn );
 
-   tap_pslurp();
+   tap_parse();
 
    tap_pclose();
-
-   tap_parse();
 
    tap_output();
 };
 
 int main( int argc, char** argv )
 {
-   GC_INIT();
-
    if( argc < 2 )
    {
       printf( "Missing an argument\n" );
@@ -247,4 +190,6 @@ int main( int argc, char** argv )
    }
 
    tap_run( argv[ 1 ] );
+
+   return( 0 );
 }

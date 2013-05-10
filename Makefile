@@ -84,6 +84,8 @@ EXAMPLES = ./Examples
 EXDIR = $(EXAMPLES)/C
 IDIR = -I./
 LDIR = -L./
+LIBS = taptime.o
+#LIBS = -lgc
 PROG = tap
 LIB = libtap
 
@@ -105,21 +107,24 @@ endif
 
 ######################################################################
 
-all: lib examples $(PROG)
+all: $(LIB) examples $(PROG)
+
+$(LIBS): taptime.c
+	$(CC) $(CFLAGS) -c taptime.c -o $(LIBS)
 
 $(LIB): tap.h libtap.c
 	$(CC) $(CFLAGS) -c libtap.c -o $(LIB).o
 
 examples: tap.h $(LIB)
-	$(CC) $(CFLAGS) $(EXDIR)/test-exit.c $(LIB).o -o $(EXDIR)/test-exit.exe
-	$(CC) $(CFLAGS) $(EXDIR)/test-fail.c $(LIB).o -o $(EXDIR)/test-fail.exe
-	$(CC) $(CFLAGS) $(EXDIR)/test-input.c $(LIB).o -o $(EXDIR)/test-input.exe
-	$(CC) $(CFLAGS) $(EXDIR)/test-over.c $(LIB).o -o $(EXDIR)/test-over.exe
-	$(CC) $(CFLAGS) $(EXDIR)/test-under.c $(LIB).o -o $(EXDIR)/test-under.exe
-	$(CC) $(CFLAGS) $(EXDIR)/test.c $(LIB).o -o $(EXDIR)/test.exe
+	$(CC) $(CFLAGS) $(EXDIR)/testexit.c $(LIB).o $(IDIR) -o $(EXDIR)/testexit.exe
+	$(CC) $(CFLAGS) $(EXDIR)/testfail.c $(LIB).o $(IDIR) -o $(EXDIR)/testfail.exe
+	$(CC) $(CFLAGS) $(EXDIR)/testinp.c $(LIB).o $(IDIR) -o $(EXDIR)/testinp.exe
+	$(CC) $(CFLAGS) $(EXDIR)/testover.c $(LIB).o $(IDIR) -o $(EXDIR)/testover.exe
+	$(CC) $(CFLAGS) $(EXDIR)/testund.c $(LIB).o $(IDIR) -o $(EXDIR)/testund.exe
+	$(CC) $(CFLAGS) $(EXDIR)/test.c $(LIB).o $(IDIR) -o $(EXDIR)/test.exe
 
-$(PROG): $(LIB)
-	$(CC) $(CFLAGS) tap.c -o $(PROG)
+$(PROG): $(LIBS) tap.c
+	$(CC) $(CFLAGS) $(LIBS) tap.c -o $(PROG)
 
 install: install-libtap install-tap
 
@@ -134,7 +139,7 @@ clean:
 	rm -f $(PROG) *.o *.a
 
 superclean: clean
-	rm -f Examples/C/*.exe
+	rm -f $(EXDIR)/*.exe
 
 ultraclean: superclean
 
@@ -151,7 +156,7 @@ showconfig:
 	@echo "  ""  "ARCH_M = $(ARCH_M)
 	@echo "  ""  "CFLAGS = $(CFLAGS)
 	@echo "  ""  "LIBS = $(LIBS)
-	@echo "  ""  "PREMAKE = $(PREMAKE)
+	@echo "  ""  "PREFIX = $(PREFIX)
 	@echo "  "Build Settings "(Change by modifying Makfile)"
 	@echo "  ""  "CC = $(CC)
 	@echo "  ""  "PROG = $(PROG)
@@ -165,6 +170,19 @@ help:
 	@echo "  "
 	@echo Build from scratch:
 	@echo "  "make
+	@echo Build libtap:
+	@echo "  "make libtap
+	@echo Build tap:
+	@echo "  "make tap
+	@echo Build examples:
+	@echo "  "make examples
+	@echo Install tap and libtap to /usr/local:
+	@echo "  "make install
+	@echo Installl tap to /opt:
+	@echo "  "PREFIX=/opt make install-tap
+	@echo Find out what Makefile knows about your environment:
+	@echo "  "make showconfig
+
 
 me:
 	@echo >/dev/null
