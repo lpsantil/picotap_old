@@ -1,21 +1,22 @@
 = picotap - A tiny TAP generator library and TAP parser in C & JavaScript =
 
-== Version 0.0.1 ==
+== Version 0.0.2 ==
 
-== Date: 2013-04-26 ==
+== Date: 2013-05-10 ==
 
 == Introduction ==
 picotap is a tiny TAP generator library (test) and TAP parser (test harness) written in C and JavaScript (Browser & OneMonkey JS).  It was inspired by code in kazuho's github projects.
 
 == Prequisites ==
 C Prequisites:
-* tap requires that Boehm GC be installed to compile
+* tap requires GCC or clang/LLVM on Linux or OSX, or, OpenWatcom on DOS
 
 JS Prequisites:
 * Browser: console.log
 * CLI: OneMonkey JS (v8-based) interpreter
 
-If you get stuck, try typing '''make help''' or looking at the Examples directory.
+If you get stuck in Linux or OSX, try typing '''make help''' or looking at the Examples directory.
+If you get stuck in DOS, try typing '''mkwcc help''' or looking at the Examples directory.
 
 == Examples ==
 === Making a TAP generator (a test) in C ===
