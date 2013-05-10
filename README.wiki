@@ -1,4 +1,4 @@
-= picotap - A tiny TAP generator library and TAP parser in C & JavaScript =
+= picotap - A tiny TAP generator library and TAP parser in C & JavaScript, for Linux, OSX, DOS, and your browser =
 
 == Version 0.0.2 ==
 
@@ -81,8 +81,8 @@ If you get stuck in DOS, try typing '''mkwcc help''' or looking at the Examples 
 * Verify the TAP parser results in the JS Console
 
 === Making a TAP generator (a test) in C (DOS) ===
-* In '''.\\picotap''', type:
- mkwcc all
+* In '''\picotap''', type:
+ C:\picotap>mkwcc all
 * Include tap.h into your test file
 * Start your test source with
  plan( 10 ); // If your test plan includes 10 tests
@@ -94,11 +94,11 @@ If you get stuck in DOS, try typing '''mkwcc help''' or looking at the Examples 
 * Compile your test code by including the path to '''tap.h''' and linking to '''libtap.o'''
  wcl test.c libtap.obj -fe=test.exe
 
-=== Making a TAP parser run (test harness) in C ===
-* In '''.\\picotap''', type:
- mkwcc all
+=== Making a TAP parser run (test harness) in C (DOS) ===
+* In '''\picotap''', type:
+ C:\picotap>mkwcc all
 * Execute the test via the tap parser
- C:\>tap \PATH\TO\test.exe
+ C:\picotap>tap \PATH\TO\test.exe
 * '''tap''' will open a pipe to '''test.exe''', reading its stdout and parse it
 * For output to stdout not part of the test plan results
 ** Prefix with a '''space''', '''tab''', or '''#'''
